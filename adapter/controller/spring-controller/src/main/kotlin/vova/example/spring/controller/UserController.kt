@@ -9,29 +9,44 @@ import vova.example.spring.model.UserWeb
 import vova.example.spring.model.UserWeb.Companion.toUserWeb
 import vova.example.usecase.CreateUser
 import vova.example.usecase.FindUser
+import org.springframework.scheduling.annotation.Async
+import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.asCompletableFuture
 
 const val USER_ID = "userId"
 
+//TODO use https://github.com/konrad-kaminski/spring-kotlin-coroutine
+// instead of converting to CompletableFuture
+
 @RestController
 @RequestMapping(UserWebPath.USERS)
-class UserController @Autowired
+open class UserController @Autowired
 constructor(private val createUser: CreateUser, private val findUser: FindUser) {
 
+    @Async
     @PostMapping
-    fun createUser(@RequestBody userWeb: UserWeb): UserWeb {
-        return userWeb//UserWeb.toUserWeb(createUser.create(userWeb.toUser()))
+    open fun createUser(@RequestBody userWeb: UserWeb): CompletableFuture<UserWeb> {
+        return GlobalScope.async {
+            UserWeb.toUserWeb(createUser.create(userWeb.toUser()))
+        }.asCompletableFuture()
     }
 
+    @Async
     @GetMapping("/{$USER_ID}")
-    fun getUser(@PathVariable(USER_ID) userId: String): UserWeb {
-        return UserWeb(email="",firstName = "",lastName = "")
-        //return UserWeb.toUserWeb(findUser.findById(userId).orElseThrow { UserNotFoundException("User with user id:$userId not found") })
+    open fun getUser(@PathVariable(USER_ID) userId: String): CompletableFuture<UserWeb> {
+        return GlobalScope.async {
+            UserWeb.toUserWeb(findUser.findById(userId).orElseThrow { UserNotFoundException("User with user id:$userId not found") })
+        }.asCompletableFuture()
     }
 
+    @Async
     @GetMapping
-    fun allUsers(): List<UserWeb> {
-        return listOf()
-        //return findUser.findAllUsers().map { toUserWeb(it) }
+    open fun allUsers(): CompletableFuture<List<UserWeb>> {
+        return GlobalScope.async {
+            findUser.findAllUsers().map { toUserWeb(it) }
+        }.asCompletableFuture()
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)

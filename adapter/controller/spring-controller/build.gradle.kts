@@ -13,8 +13,11 @@ dependencies {
     implementation(project(":usecase"))
     implementation(project(":domain"))
     implementation("org.springframework:spring-web:5.0.5.RELEASE")
+    implementation("org.springframework:spring-context:5.0.5.RELEASE")
     implementation("com.fasterxml.jackson.core:jackson-core:2.9.5")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1")
 //    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 }
