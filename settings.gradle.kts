@@ -1,4 +1,4 @@
-rootProject.name = "clean-architecture-example"
+rootProject.name = "clean-architecture-kotlin"
 
 include(":config")
 include(":domain")

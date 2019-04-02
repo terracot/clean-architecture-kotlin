@@ -1,10 +1,10 @@
 package vova.example.vertx.controller
 
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import vova.example.domain.entity.User
 import vova.example.domain.entity.UserWebPath
@@ -20,13 +20,13 @@ class VertxUserController(
     private val loginUser: LoginUser
 ) {
 
-    private val userId = "userId"
+    private val userIdPathParam = "userId"
 
     suspend fun createUser(routingContext: RoutingContext) {
         val response = routingContext.response()
         val body = routingContext.body
         if (isNull(body)) {
-            sendError(400, response)
+            sendError(400, response, "user object is missing")
         } else {
             val userWeb = body.toJsonObject().mapTo(UserWeb::class.java)
             var user: User?
@@ -35,8 +35,7 @@ class VertxUserController(
                 val result = JsonObject.mapFrom(UserWeb.toUserWeb(user))
                 sendSuccess(result, response)
             } catch (e: UserAlreadyExistsException) {
-                val error = JsonObject.mapFrom(mapOf("error" to "User already exists:" + e.message))
-                sendError(409, response, error)
+                sendError(409, response, "User already exists:${e.message}")
             }
 
         }
@@ -47,7 +46,7 @@ class VertxUserController(
         val email = routingContext.request().getParam(UserWebPath.LOGIN_EMAIL)
         val password = routingContext.request().getParam(UserWebPath.LOGIN_PASSWORD)
         if (email == null || password == null) {
-            sendError(400, response)
+            sendError(400, response, "email or password is missing")
         } else {
             val user = loginUser.login(email, password)
             val result = JsonObject.mapFrom(UserWeb.toUserWeb(user))
@@ -57,16 +56,16 @@ class VertxUserController(
 
     suspend fun findUser(routingContext: RoutingContext) {
         val response = routingContext.response()
-        val userId = routingContext.request().getParam(userId)
+        val userId = routingContext.request().getParam(userIdPathParam)
         if (userId == null) {
-            sendError(400, response)
+            sendError(400, response, "user id is missing")
         } else {
             val user = findUser.findById(userId)
             if (user.isPresent) {
                 val result = JsonObject.mapFrom(UserWeb.toUserWeb(user.get()))
                 sendSuccess(result, response)
             } else {
-                sendError(404, response)
+                sendError(404, response, "User $userId not found")
             }
         }
     }
@@ -86,18 +85,11 @@ class VertxUserController(
         return buffer == null || "" == buffer.toString()
     }
 
-    private fun sendError(statusCode: Int, response: HttpServerResponse, body: JsonObject) {
+    private fun sendError(statusCode: Int, response: HttpServerResponse, message: String) {
         response
             .putHeader("content-type", "application/json")
             .setStatusCode(statusCode)
-            .end(body.encodePrettily())
-    }
-
-    private fun sendError(statusCode: Int, response: HttpServerResponse) {
-        response
-            .putHeader("content-type", "application/json")
-            .setStatusCode(statusCode)
-            .end()
+            .end(JsonObject(mapOf("error" to message)).encodePrettily())
     }
 
     private fun sendSuccess(body: JsonObject, response: HttpServerResponse) {
@@ -106,11 +98,16 @@ class VertxUserController(
             .end(body.encodePrettily())
     }
 
-    fun createRoutes(router: Router) {
-//        router.post(UserWebPath.USERS).handler { createUser(it) }
-//        router.get(UserWebPath.LOGIN).handler { login(it) }
-//        router.get("${UserWebPath.USERS}/:$userId").handler { findUser(it) }
-//        router.get(UserWebPath.USERS).handler { findAllUser(it) }
+    fun getRoutes(): Set<RouteDef> {
+        return setOf(
+            RouteDef(HttpMethod.GET, UserWebPath.USERS, ::findAllUser),
+            RouteDef(HttpMethod.GET, "${UserWebPath.USERS}/:$userIdPathParam", ::findUser),
+            RouteDef(HttpMethod.POST, UserWebPath.USERS, ::createUser),
+            RouteDef(HttpMethod.GET, UserWebPath.LOGIN, ::login)
+        )
     }
 
+    class RouteDef(val method: HttpMethod, val path: String, val handler: suspend (RoutingContext) -> Unit)
+
 }
+

@@ -11,7 +11,7 @@ fun main() {
 
     val app = Javalin.create().apply {
         exception(Exception::class.java) { e, _ -> e.printStackTrace() }
-        error(404) { ctx -> ctx.json("not found") }
+//        error(404) { ctx -> ctx.json("not found") }
     }.start(8080)
 
     app.routes(userController::routes)
