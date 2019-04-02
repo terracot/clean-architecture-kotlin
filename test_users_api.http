@@ -9,8 +9,10 @@ POST http://localhost:8080/users
 Content-Type: application/json
 
 {
-  "email"
-  "value": "content"
+  "email": "test@mail.org",
+  "password": "hunter2",
+  "lastName": "Azure",
+  "firstName": "Diamond"
 }
 
 ###
