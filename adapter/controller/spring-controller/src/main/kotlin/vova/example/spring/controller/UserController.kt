@@ -19,18 +19,19 @@ constructor(private val createUser: CreateUser, private val findUser: FindUser) 
 
     @PostMapping
     fun createUser(@RequestBody userWeb: UserWeb): UserWeb {
-        return UserWeb.toUserWeb(createUser.create(userWeb.toUser()))
+        return userWeb//UserWeb.toUserWeb(createUser.create(userWeb.toUser()))
     }
 
     @GetMapping("/{$USER_ID}")
     fun getUser(@PathVariable(USER_ID) userId: String): UserWeb {
-        return UserWeb.toUserWeb(findUser.findById(userId)
-            .orElseThrow { UserNotFoundException("User with user id:$userId not found") })
+        return UserWeb(email="",firstName = "",lastName = "")
+        //return UserWeb.toUserWeb(findUser.findById(userId).orElseThrow { UserNotFoundException("User with user id:$userId not found") })
     }
 
     @GetMapping
     fun allUsers(): List<UserWeb> {
-        return findUser.findAllUsers().map { toUserWeb(it) }
+        return listOf()
+        //return findUser.findAllUsers().map { toUserWeb(it) }
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)

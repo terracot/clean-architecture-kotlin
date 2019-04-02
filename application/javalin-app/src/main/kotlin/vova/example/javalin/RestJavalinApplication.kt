@@ -1,6 +1,7 @@
 package vova.example.javalin
 
 import io.javalin.Javalin
+import io.javalin.NotFoundResponse
 import vova.example.config.JavalinConfig
 
 
@@ -14,5 +15,10 @@ fun main() {
     }.start(8080)
 
     app.routes(userController::routes)
-
+//    app.exception(NotFoundResponse.class, (e,ctx)->{
+//
+//    })
+    app.exception(NotFoundResponse::class.java) { e, ctx ->
+        ctx.json(mapOf("error" to e.message))
+    }
 }

@@ -17,7 +17,7 @@ constructor(private val loginUser: LoginUser) {
     @GetMapping
     fun login(@RequestParam(UserWebPath.LOGIN_EMAIL) email: String,
               @RequestParam(UserWebPath.LOGIN_PASSWORD) password: String): UserWeb {
-        return UserWeb.toUserWeb(loginUser.login(email, password))
+        return UserWeb(email="",firstName = "",lastName = "")//UserWeb.toUserWeb(loginUser.login(email, password))
     }
 
 }

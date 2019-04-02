@@ -22,7 +22,7 @@ class VertxUserController(
 
     private val userId = "userId"
 
-    fun createUser(routingContext: RoutingContext) {
+    suspend fun createUser(routingContext: RoutingContext) {
         val response = routingContext.response()
         val body = routingContext.body
         if (isNull(body)) {
@@ -42,7 +42,7 @@ class VertxUserController(
         }
     }
 
-    fun login(routingContext: RoutingContext) {
+    suspend fun login(routingContext: RoutingContext) {
         val response = routingContext.response()
         val email = routingContext.request().getParam(UserWebPath.LOGIN_EMAIL)
         val password = routingContext.request().getParam(UserWebPath.LOGIN_PASSWORD)
@@ -55,7 +55,7 @@ class VertxUserController(
         }
     }
 
-    fun findUser(routingContext: RoutingContext) {
+    suspend fun findUser(routingContext: RoutingContext) {
         val response = routingContext.response()
         val userId = routingContext.request().getParam(userId)
         if (userId == null) {
@@ -71,7 +71,7 @@ class VertxUserController(
         }
     }
 
-    fun findAllUser(routingContext: RoutingContext) {
+    suspend fun findAllUser(routingContext: RoutingContext) {
         val response = routingContext.response()
         val users = findUser.findAllUsers()
         val result = JsonArray(users.map { user -> JsonObject.mapFrom(UserWeb.toUserWeb(user)) })
@@ -107,10 +107,10 @@ class VertxUserController(
     }
 
     fun createRoutes(router: Router) {
-        router.post(UserWebPath.USERS).handler { createUser(it) }
-        router.get(UserWebPath.LOGIN).handler { login(it) }
-        router.get("${UserWebPath.USERS}/:$userId").handler { findUser(it) }
-        router.get(UserWebPath.USERS).handler { findAllUser(it) }
+//        router.post(UserWebPath.USERS).handler { createUser(it) }
+//        router.get(UserWebPath.LOGIN).handler { login(it) }
+//        router.get("${UserWebPath.USERS}/:$userId").handler { findUser(it) }
+//        router.get(UserWebPath.USERS).handler { findAllUser(it) }
     }
 
 }

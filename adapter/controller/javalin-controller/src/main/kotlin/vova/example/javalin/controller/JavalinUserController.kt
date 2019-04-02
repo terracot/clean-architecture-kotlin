@@ -1,25 +1,34 @@
 package vova.example.javalin.controller
 
 import io.javalin.Context
+import io.javalin.HttpResponseException
+import io.javalin.NotFoundResponse
 import io.javalin.apibuilder.ApiBuilder
+import kotlinx.coroutines.*
+import kotlinx.coroutines.future.asCompletableFuture
+import org.eclipse.jetty.http.HttpStatus
+import vova.example.domain.entity.User
 import vova.example.domain.entity.UserWebPath
 import vova.example.domain.exception.UserAlreadyExistsException
 import vova.example.javalin.model.UserWeb
 import vova.example.usecase.CreateUser
 import vova.example.usecase.FindUser
 import vova.example.usecase.LoginUser
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.function.BiFunction
 
 class JavalinUserController(
     private val createUser: CreateUser,
     private val findUser: FindUser,
     private val loginUser: LoginUser
 ) {
-    private val userId = "user-id"
+    private val userIdParam = "user-id"
 
     fun routes() {
         ApiBuilder.post(UserWebPath.USERS, this::createUser)
         ApiBuilder.get(UserWebPath.USERS, this::getAllUsers)
-        ApiBuilder.get("${UserWebPath.USERS}/:$userId", this::getUser)
+        ApiBuilder.get("${UserWebPath.USERS}/:$userIdParam", this::getUser)
         ApiBuilder.get(UserWebPath.LOGIN, this::userLogin)
     }
 
@@ -30,37 +39,56 @@ class JavalinUserController(
 //    }
 
     fun getAllUsers(ctx: Context) {
-        ctx.json(findUser.findAllUsers().map{user -> UserWeb.toUserWeb(user)})
+        ctx.json(findAllFuture())
     }
+
+    private fun findAllFuture(): CompletableFuture<List<UserWeb>> {
+        return GlobalScope.async { findUser.findAllUsers() }.asCompletableFuture()
+            .thenApply { users -> users.map { user -> UserWeb.toUserWeb(user) } }
+    }
+
 
     fun createUser(ctx: Context) {
         val userWeb = ctx.body<UserWeb>()
+        val handler = CoroutineExceptionHandler { _, exception ->
+            println("Caught $exception")
+        }
         try {
-            val user = createUser.create(userWeb.toUser())
-            ctx.json(UserWeb.toUserWeb(user))
-        } catch (e: UserAlreadyExistsException) {
-            sendError(ctx,409, "User already exists:${e.message}")
+            val asyncResult = GlobalScope.async(handler) { createUser.create(userWeb.toUser()) }
+                .asCompletableFuture()
+                .thenApplyAsync{user -> UserWeb.toUserWeb(user)}
+            ctx.json(asyncResult)
+            //TODO Async catch
+        } catch (e: CompletionException) {
+            sendError(ctx, 409, "User already exists:${e.cause?.message}")
         }
     }
 
     fun getUser(ctx: Context) {
-        val userId = ctx.pathParam(userId)
-        val user = findUser.findById(userId)
-        if (user.isPresent) {
-            ctx.json(UserWeb.toUserWeb(user.get()))
-        } else {
-            sendError(ctx, 404, "Not found")
-        }
+        val userId = ctx.pathParam(userIdParam)
+        val asyncResult : CompletableFuture<UserWeb> = GlobalScope.async {findUser.findById(userId)}
+            .asCompletableFuture()
+            .thenApplyAsync { userOpt ->
+                if(userOpt.isPresent) {
+                    UserWeb.toUserWeb(userOpt.get())
+                } else {
+                    //throw HttpResponseException(HttpStatus.NOT_FOUND_404, details = mapOf("error" to "Not found"), msg = "test")
+                    throw NotFoundResponse("User with id:$userId Not found")
+                    //mapOf("error" to "Not found")
+                }
+            }
+        ctx.json(asyncResult)
     }
 
     fun userLogin(ctx: Context) {
         val email = ctx.queryParam(UserWebPath.LOGIN_EMAIL)
         val password = ctx.queryParam(UserWebPath.LOGIN_PASSWORD)
         if (email == null || password == null) {
-            sendError(ctx,400, "email or password is missing")
+            sendError(ctx, 400, "email or password is missing")
         } else {
-            val user = loginUser.login(email, password)
-            ctx.json(user)
+            val asyncResult = GlobalScope.async {loginUser.login(email, password)}
+                .asCompletableFuture()
+            ctx.json(asyncResult)
         }
     }
 

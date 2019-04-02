@@ -3,7 +3,7 @@ package vova.example
 import vova.example.config.ManualConfig
 import vova.example.domain.entity.User
 
-fun main() {
+suspend fun main() {
     // Setup
     val config = ManualConfig()
     val createUser = config.createUser()
