@@ -1,8 +1,7 @@
 package vova.example.javalin.controller
 
 import io.javalin.Context
-import io.javalin.NotFoundResponse
-import io.javalin.apibuilder.ApiBuilder
+import io.javalin.apibuilder.ApiBuilder.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -23,11 +22,17 @@ class JavalinUserController(
 ) {
     private val userIdParam = "user-id"
 
-    fun routes() {
-        ApiBuilder.post(UserWebPath.USERS, this::createUser)
-        ApiBuilder.get(UserWebPath.USERS, this::getAllUsers)
-        ApiBuilder.get("${UserWebPath.USERS}/:$userIdParam", this::getUser)
-        ApiBuilder.get(UserWebPath.LOGIN, this::userLogin)
+    fun routes() = {
+        path(UserWebPath.USERS) {
+            post { ctx -> createUser(ctx) }
+            get { ctx -> getAllUsers(ctx) }
+            path(userIdParam) {
+                get { ctx -> getUser(ctx) }
+            }
+        }
+        path(UserWebPath.LOGIN) {
+            get { ctx -> userLogin(ctx) }
+        }
     }
 
     fun getAllUsers(ctx: Context) {
@@ -60,7 +65,7 @@ class JavalinUserController(
                 if (userOpt.isPresent) {
                     UserWeb.toUserWeb(userOpt.get())
                 } else {
-                    sendError(ctx,404)
+                    sendError(ctx, 404)
                     mapOf("error" to "User $userId not found")
                 }
             }
