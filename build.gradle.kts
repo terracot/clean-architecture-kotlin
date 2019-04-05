@@ -11,6 +11,8 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        maven("https://repo.spring.io/snapshot")
+        maven("https://repo.spring.io/milestone")
     }
 }
 
