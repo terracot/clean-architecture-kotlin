@@ -24,28 +24,24 @@ class JavalinUserController(
 
     fun routes() = {
         path(UserWebPath.USERS) {
-            post { ctx -> createUser(ctx) }
-            get { ctx -> getAllUsers(ctx) }
+            post(::createUserOp)
+            get(::getAllUsers)
             path(userIdParam) {
-                get { ctx -> getUser(ctx) }
+                get(::getUser)
             }
         }
         path(UserWebPath.LOGIN) {
-            get { ctx -> userLogin(ctx) }
+            get(::userLogin)
         }
     }
 
     fun getAllUsers(ctx: Context) {
-        ctx.json(findAllFuture())
+        ctx.json(GlobalScope.async { findUser.findAllUsers() }
+            .asCompletableFuture()
+            .thenApply { users -> users.map { user -> UserWeb.toUserWeb(user)}})
     }
 
-    private fun findAllFuture(): CompletableFuture<List<UserWeb>> {
-        return GlobalScope.async { findUser.findAllUsers() }.asCompletableFuture()
-            .thenApply { users -> users.map { user -> UserWeb.toUserWeb(user) } }
-    }
-
-
-    fun createUser(ctx: Context) {
+    fun createUserOp(ctx: Context) {
         val userWeb = ctx.body<UserWeb>()
         val handler = CoroutineExceptionHandler { _, exception ->
             println("Caught $exception")
