@@ -38,7 +38,11 @@ open class UsersRouter {
 }
 
 @Component
-class UsersHandler @Autowired constructor(private val createUser: CreateUser, private val findUser: FindUser, private val loginUser:LoginUser) {
+class UsersHandler @Autowired constructor(
+    private val createUser: CreateUser,
+    private val findUser: FindUser,
+    private val loginUser: LoginUser
+) {
 
     suspend fun getAllUsers(request: ServerRequest): ServerResponse =
         ServerResponse.ok().bodyAndAwait(findUser.findAllUsers().map { user -> UserWeb.toUserWeb(user) })
@@ -46,10 +50,11 @@ class UsersHandler @Autowired constructor(private val createUser: CreateUser, pr
     suspend fun getUser(request: ServerRequest): ServerResponse {
         val id = request.pathVariable("id")
         val user = findUser.findById(id)
-        return if(user.isPresent) {
+        return if (user.isPresent) {
             ok().bodyAndAwait(UserWeb.toUserWeb(user.get()))
         } else {
-            status(HttpStatus.NOT_FOUND).bodyAndAwait(mapOf("error" to "User $id not found"))
+            errorResponse(HttpStatus.NOT_FOUND, "User $id not found")
+//            status(HttpStatus.NOT_FOUND).bodyAndAwait(mapOf("error" to "User $id not found"))
         }
     }
 
@@ -57,17 +62,22 @@ class UsersHandler @Autowired constructor(private val createUser: CreateUser, pr
         try {
             status(HttpStatus.CREATED).bodyAndAwait(UserWeb.toUserWeb(createUser.create(request.awaitBody<UserWeb>().toUser())))
         } catch (e: UserAlreadyExistsException) {
-            status(HttpStatus.CONFLICT).bodyAndAwait(mapOf("error" to "User already exists:${e.message}"))
+            errorResponse(HttpStatus.CONFLICT, "User already exists:${e.message}")
         }
 
     suspend fun loginUser(request: ServerRequest): ServerResponse {
         val email = request.queryParam(UserWebPath.LOGIN_EMAIL)
         val password = request.queryParam(UserWebPath.LOGIN_PASSWORD)
         return if (email.isEmpty || password.isEmpty) {
-            badRequest().bodyAndAwait("email or password is missing")
-        } else { val user = loginUser.login(email.get(), password.get())
-            ok().bodyAndAwait(UserWeb.toUserWeb(user))
+            errorResponse(HttpStatus.BAD_REQUEST, "email or password is missing")
+        } else {
+            ok().bodyAndAwait(UserWeb.toUserWeb(loginUser.login(email.get(), password.get())))
         }
     }
+
+    private suspend fun errorResponse(status: HttpStatus, error: String) = status(status).bodyAndAwait(mapOf("error" to error))
+
+    private suspend fun loginWith(email: String, password: String): ServerResponse =
+        ok().bodyAndAwait(UserWeb.toUserWeb(loginUser.login(email, password)))
 
 }

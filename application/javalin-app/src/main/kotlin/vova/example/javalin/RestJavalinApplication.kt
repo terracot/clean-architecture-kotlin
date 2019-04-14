@@ -18,7 +18,7 @@ fun main() {
 //    app.exception(NotFoundResponse.class, (e,ctx)->{
 //
 //    })
-    app.exception(NotFoundResponse::class.java) { e, ctx ->
-        ctx.json(mapOf("error" to e.message))
-    }
+//    app.exception(NotFoundResponse::class.java) { e, ctx ->
+//        ctx.json(mapOf("error" to e.message))
+//    }
 }

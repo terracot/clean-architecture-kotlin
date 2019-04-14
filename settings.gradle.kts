@@ -2,6 +2,7 @@ rootProject.name = "clean-architecture-kotlin"
 
 include(":config")
 include(":domain")
+include(":deployment")
 include(":usecase")
 include(":jug")
 include(":uuid")

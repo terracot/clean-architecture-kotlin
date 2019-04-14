@@ -20,9 +20,9 @@ class JavalinUserController(
     private val findUser: FindUser,
     private val loginUser: LoginUser
 ) {
-    private val userIdParam = "user-id"
+    private val userIdParam = ":user-id"
 
-    fun routes() = {
+    fun routes() {
         path(UserWebPath.USERS) {
             post(::createUserOp)
             get(::getAllUsers)
