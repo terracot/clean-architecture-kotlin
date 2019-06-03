@@ -5,6 +5,7 @@ import io.javalin.apibuilder.ApiBuilder.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.future.asCompletableFuture
 import vova.example.domain.entity.User
 import vova.example.domain.entity.UserWebPath
@@ -36,9 +37,8 @@ class JavalinUserController(
     }
 
     fun getAllUsers(ctx: Context) {
-        ctx.json(GlobalScope.async { findUser.findAllUsers() }
-            .asCompletableFuture()
-            .thenApply { users -> users.map { user -> UserWeb.toUserWeb(user)}})
+        ctx.json(GlobalScope.async { findUser.findAllUsers().map{user -> UserWeb.toUserWeb(user)} }
+            .asCompletableFuture())
     }
 
     fun createUserOp(ctx: Context) {

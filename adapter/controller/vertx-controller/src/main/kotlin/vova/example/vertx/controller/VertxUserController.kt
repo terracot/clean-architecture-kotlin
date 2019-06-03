@@ -6,6 +6,8 @@ import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import vova.example.domain.entity.User
 import vova.example.domain.entity.UserWebPath
 import vova.example.domain.exception.UserAlreadyExistsException
@@ -73,7 +75,7 @@ class VertxUserController(
     suspend fun findAllUser(routingContext: RoutingContext) {
         val response = routingContext.response()
         val users = findUser.findAllUsers()
-        val result = JsonArray(users.map { user -> JsonObject.mapFrom(UserWeb.toUserWeb(user)) })
+        val result = JsonArray(users.map { user -> JsonObject.mapFrom(UserWeb.toUserWeb(user)) } .toList())
 //            .collect<JsonArray, List<JsonObject>>(JsonCollectors.toJsonArray())
         response
             .putHeader("content-type", "application/json")

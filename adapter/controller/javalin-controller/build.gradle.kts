@@ -14,8 +14,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.9.5")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.9.5")
     implementation("io.javalin:javalin:2.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.2.1")
 }
 
 tasks.withType<KotlinCompile> {

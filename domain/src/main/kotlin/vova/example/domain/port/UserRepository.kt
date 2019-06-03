@@ -1,5 +1,6 @@
 package vova.example.domain.port
 
+import kotlinx.coroutines.flow.Flow
 import vova.example.domain.entity.User
 import java.util.Optional
 
@@ -11,5 +12,5 @@ interface UserRepository {
 
     suspend fun findByEmail(email: String): Optional<User>
 
-    suspend fun findAllUsers(): List<User>
+    fun findAllUsers(): Flow<User>
 }

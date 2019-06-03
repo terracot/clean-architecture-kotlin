@@ -1,5 +1,8 @@
 package vova.example.db.hazelcast
 
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import vova.example.db.hazelcast.model.UserDb
 import vova.example.domain.entity.User
 import vova.example.domain.port.UserRepository
@@ -30,10 +33,12 @@ class HazelcastUserRepository : UserRepository {
             .findAny()
     }
 
-    override suspend fun findAllUsers(): List<User> {
+    @FlowPreview
+    override fun findAllUsers(): Flow<User> {
         return HAZELCAST.getMap<String, UserDb>(MAP_NAME)
             .values
             .map { it.toUser() }
+            .asFlow()
     }
 
     companion object {

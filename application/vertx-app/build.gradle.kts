@@ -17,8 +17,8 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin-coroutines:3.7.0")
     implementation("io.vertx:vertx-lang-kotlin:3.7.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.2.1")
 }
 
 application {

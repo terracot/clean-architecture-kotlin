@@ -17,7 +17,6 @@ dependencies {
     implementation("com.h2database:h2:$h2Version")
     implementation("org.jetbrains.exposed:exposed:$exposedVersion")
     implementation("com.zaxxer:HikariCP:3.3.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
 
 }
 

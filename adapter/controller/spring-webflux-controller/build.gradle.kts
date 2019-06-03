@@ -16,8 +16,6 @@ dependencies {
     implementation("org.springframework:spring-web:5.2.0.BUILD-SNAPSHOT")
     implementation("org.springframework:spring-webflux:5.2.0.BUILD-SNAPSHOT")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.1.1")
 }
 
 tasks.withType<KotlinCompile> {

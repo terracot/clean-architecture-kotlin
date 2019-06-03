@@ -1,5 +1,6 @@
 package vova.example.spring.controller
 
+import kotlinx.coroutines.flow.map
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -45,7 +46,7 @@ class UsersHandler @Autowired constructor(
 ) {
 
     suspend fun getAllUsers(request: ServerRequest): ServerResponse =
-        ServerResponse.ok().bodyAndAwait(findUser.findAllUsers().map { user -> UserWeb.toUserWeb(user) })
+        ok().bodyAndAwait(findUser.findAllUsers().map { user -> UserWeb.toUserWeb(user) })
 
     suspend fun getUser(request: ServerRequest): ServerResponse {
         val id = request.pathVariable("id")

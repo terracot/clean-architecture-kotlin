@@ -13,6 +13,8 @@ import org.springframework.scheduling.annotation.Async
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.future.asCompletableFuture
 
 const val USER_ID = "userId"
@@ -43,7 +45,7 @@ constructor(private val createUser: CreateUser, private val findUser: FindUser) 
 
     @Async
     @GetMapping
-    open fun allUsers(): CompletableFuture<List<UserWeb>> {
+    open fun allUsers(): CompletableFuture<Flow<UserWeb>> {
         return GlobalScope.async {
             findUser.findAllUsers().map { toUserWeb(it) }
         }.asCompletableFuture()

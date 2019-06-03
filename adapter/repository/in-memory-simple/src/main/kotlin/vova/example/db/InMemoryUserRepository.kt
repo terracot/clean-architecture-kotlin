@@ -1,6 +1,8 @@
 package vova.example.db
 
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import vova.example.domain.entity.User
 import vova.example.domain.port.UserRepository
 
@@ -25,7 +27,7 @@ class InMemoryUserRepository : UserRepository {
             .findAny()
     }
 
-    override suspend fun findAllUsers(): List<User> {
-        return ArrayList(inMemoryDb.values)
+    override fun findAllUsers(): Flow<User> {
+        return ArrayList(inMemoryDb.values).asFlow()
     }
 }

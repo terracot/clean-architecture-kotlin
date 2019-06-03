@@ -1,5 +1,9 @@
 package vova.example.db.exposed
 
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -45,12 +49,14 @@ class ExposedRepository : UserRepository {
         }
 
 
-    override suspend fun findAllUsers(): List<User> =
-        dbQuery {
-            Users.selectAll()
-                .map { toUser(it) }
+    @FlowPreview
+    override fun findAllUsers(): Flow<User> =
+        flow {
+            dbQuery {
+                Users.selectAll()
+                    .map { toUser(it) }
+            }.forEach { emit(it) }
         }
-
 
     private fun toUser(row: ResultRow) =
         User(

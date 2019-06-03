@@ -9,6 +9,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import kotlinx.coroutines.flow.map
 import vova.example.domain.entity.UserWebPath
 import vova.example.domain.exception.UserAlreadyExistsException
 import vova.example.ktor.model.UserWeb
